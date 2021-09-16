@@ -1,1 +1,5 @@
 maps folder contains maps used in the contest tests. file name is a map dimension. map 1000 is used in tests 6 to 10.
+
+tests.csv contains data for tests creation. for each test we have to set up random orders generator:
+Order is set of 4 random numbers from 1 to map dimension.
+At each iteration orders_count / iterations_count orders must be generated
