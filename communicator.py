@@ -31,8 +31,11 @@ sys.stdout.flush()
 for _ in range(0, iterations_count):
 	input_line = sys.stdin.readline()
 	orders_in_iteration = int(input_line)
+	orders = []
 	for _ in range(0, orders_in_iteration):
 		input_line = sys.stdin.readline()
-		start_x, start_y, finish_x, finish_y = map(int, input_line.split())
+		orders.append(map(int, input_line.split()))
+
+
 	sys.stdout.write('SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS\n')
 	sys.stdout.flush()
