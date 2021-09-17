@@ -1,6 +1,6 @@
-map max_tips cost_courier iterations_count orders_count
+map_name max_tips cost_courier iterations_count orders_count
 4 20 10 7 7
-28 500 1000 100 100
+128 500 1000 100 100
 180 500 5000 1000 1514
 384 3600 765432 36000 54047
 1024 3600 555555 50000 75259
