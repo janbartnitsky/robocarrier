@@ -5,12 +5,35 @@
 I'm trying to use TDD here
 """
 
+from pathlib import Path
 from typing import Dict, List, Tuple
 from unittest.result import TestResult
 
 import numpy as np
 
 Point = Tuple
+
+
+def convert_file_to_array_map(filename: str) -> np.ndarray:
+    file = Path(filename)
+    assert file.exists()
+
+    lines = []
+    with open(file) as f:
+        for line in f.readlines():
+            binary_line = []
+            for point in line:
+                if point == '.':
+                    binary_line.append(0)
+                elif point == '#':
+                    binary_line.append(1)
+                elif point == '\n':
+                    continue
+                else:
+                    raise ValueError(f"Unknown character in map file: {point}")
+            lines.append(binary_line)
+
+    return np.array(lines, dtype=int)
 
 class ShortestPathFinder(object):
     """
@@ -76,9 +99,9 @@ class ShortestPathFinder(object):
         while frontier_queue:
             current = frontier_queue.pop(0)
             for neighbour in self._get_neighbours(current):
-                print(f'Exporing the neighbour {neighbour}')
+                # print(f'Exporing the neighbour {neighbour}')
                 if neighbour in came_from:
-                    print(f'Already explored this guy {neighbour} -> skipping')
+                    # print(f'Already explored this guy {neighbour} -> skipping')
                     continue
                 nx, ny = neighbour
                 if self.maze[nx][ny] == self.OBSTACLE:
