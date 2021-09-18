@@ -70,20 +70,20 @@ class ShortestPathFinder(object):
         return list(reversed(shortest_path_backwards))
 
     def _is_inside_maze(self, p: Point) -> bool:
-        px, py = p
-        if px < 0 or py < 0:
+        row, col = p
+        if row < 0 or col < 0:
             return False
 
-        max_x, max_y = self.maze.shape
-        if px >= max_x or py >= max_y:
+        max_row, max_col = self.maze.shape
+        if row >= max_row or col >= max_col:
             return False
 
         return True
 
     def _get_neighbours(self, p: Point) -> List[Point]:
         """Always expores neighnours in predefined order: right, down, left, up"""
-        px, py = p
-        neighbours = [(px+1, py), (px, py+1), (px-1, py), (px, py-1)]
+        row, col = p
+        neighbours = [(row, col+1), (row+1, col), (row, col-1), (row-1, col)]
         return [n for n in neighbours if self._is_inside_maze(n)]
 
     def _BFS(self, start: Point, finish: Point) -> List[Point]:
@@ -103,8 +103,8 @@ class ShortestPathFinder(object):
                 if neighbour in came_from:
                     # print(f'Already explored this guy {neighbour} -> skipping')
                     continue
-                nx, ny = neighbour
-                if self.maze[nx][ny] == self.OBSTACLE:
+                row, col = neighbour
+                if self.maze[row][col] == self.OBSTACLE:
                     continue
                 frontier_queue.append(neighbour)
                 came_from[neighbour] = current

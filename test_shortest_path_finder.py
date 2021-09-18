@@ -38,13 +38,14 @@ class ShortestPathFinderTest(unittest.TestCase):
 
         self.assertEqual((dist, shortest_path), (0, []))
 
-    def test_getting_correct_neighbours_on_the_edge_of_map(self):
+    def test_getting_correct_neighbours_on_the_start_edge_of_map(self):
         neighbours = self.spf._get_neighbours((0,0))
-        expected_neighbours = [(1,0), (0,1)]
+        expected_neighbours = [(0,1), (1,0)]
         self.assertEqual(neighbours, expected_neighbours)
 
+    def test_getting_correct_neighbours_on_the_end_edge_of_map(self):
         neighbours2 = self.spf._get_neighbours((1,1))
-        expected_neighbours2 = [(0,1), (1,0)]
+        expected_neighbours2 = [(1,0), (0,1)]
         self.assertEqual(neighbours2, expected_neighbours2)
 
     def test_spf_finds_1_distance_path(self):
@@ -65,11 +66,17 @@ class ShortestPathFinderOn4x4MazeTest(unittest.TestCase):
         self.spf = ShortestPathFinder(a_maze)
 
     def test_spf_finds_2_distance_path(self):
+        """
+        [S ~ . .]
+        [. F . .]
+        [. . . .]
+        [. . . .]
+        """
         start = (0,0)
         finish = (1,1)
         dist, shortest_path = self.spf.get_shortest_path(start, finish)
 
-        expected = (2, [start, (1,0), finish])
+        expected = (2, [start, (0,1), finish])
         self.assertEqual((dist, shortest_path), expected)
 
     def test_spf_finds_3_distance_straight_path(self):
@@ -81,11 +88,17 @@ class ShortestPathFinderOn4x4MazeTest(unittest.TestCase):
         self.assertEqual((dist, shortest_path), expected)
 
     def test_spf_finds_distance_through_all_map(self):
+        """
+        [S ~ ~ ~]
+        [. . . ~]
+        [. . . ~]
+        [. . . F]
+        """
         start = (0,0)
         finish = (3,3)
         dist, shortest_path = self.spf.get_shortest_path(start, finish)
 
-        expected = (6, [start, (1, 0), (2, 0), (3, 0), (3, 1), (3, 2), finish])
+        expected = (6, [start, (0, 1), (0, 2), (0, 3), (1, 3), (2, 3), finish])
         self.assertEqual((dist, shortest_path), expected)
 
 
@@ -141,7 +154,7 @@ class ShortestPathFinderOn1000x1000MazeTest(unittest.TestCase):
         dist, shortest_path = self.spf.get_shortest_path(start, finish)
         print(f'Distance: {dist}, {shortest_path}')
 
-    def test_path_from_one_map_side_to_another(self):
+    def test_path_from_one_map_corner_to_another(self):
         start = (675,72)
         finish = (256, 848)
 
