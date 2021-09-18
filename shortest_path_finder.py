@@ -79,7 +79,6 @@ class ShortestPathFinder(object):
         assert maze.shape[0] == maze.shape[1], 'Maze should be a square!'
 
         self.maze = maze
-        print(f"Here's our maze:\n{maze}")
 
     def _get_shortest_path_by_backward_traversal(self, came_from: Dict, finish: Point) -> List:
         assert finish in came_from, "Finish point wasn't visited (not in 'came_from' dict!"
@@ -133,7 +132,7 @@ class ShortestPathFinder(object):
                 came_from[neighbour] = current
 
                 if neighbour == finish:
-                    print(f'Finish {finish} found -> terminating the search')
+                    # print(f'Finish {finish} found -> terminating the search')
                     finish_found = True
                     break
 
