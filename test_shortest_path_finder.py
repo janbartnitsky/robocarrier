@@ -6,7 +6,7 @@ import unittest
 
 import numpy as np
 
-from shortest_path_finder import ShortestPathFinder, convert_file_to_array_map
+from shortest_path_finder import ShortestPathFinder, convert_file_to_array_map, convert_path_to_string
 
 
 
@@ -118,10 +118,40 @@ class FileMapToArrayMapConverterTest(unittest.TestCase):
             print(''.join([str(x) for x in l]))
 
 
+class ShortestPathToStringConversionTest(unittest.TestCase):
+    def test_return_empty_string_for_empty_path(self):
+        empty_path = []
+        empty_string = ''
+
+        self.assertEqual(convert_path_to_string(empty_path), empty_string)
+
+    def test_path_for_moving_right(self):
+        path = [(0,0), (0,1), (0,2)]
+        moving_right_string = 'RR'
+
+        self.assertEqual(convert_path_to_string(path), moving_right_string)
+
+    def test_path_for_moving_one_up_two_left(self):
+        path = [(5,5), (4,5), (4,4), (4,3)]
+        moving_right_string = 'ULL'
+
+        self.assertEqual(convert_path_to_string(path), moving_right_string)
+
+    def test_path_for_moving_on_180x180_map(self):
+        map180x180 = convert_file_to_array_map(r'./maps/180')
+        self.spf = ShortestPathFinder(map180x180)
+        start = (3,3)
+        finish = (3,15)
+
+        dist, shortest_path = self.spf.get_shortest_path(start, finish)
+
+        expected_path = 'RRRRRRDDDRRRRRRUUU'
+        self.assertEqual(convert_path_to_string(shortest_path), expected_path)
+
+
 class ShortestPathFinderOn180x180MazeTest(unittest.TestCase):
     def setUp(self):
         map180x180 = convert_file_to_array_map(r'./maps/180')
-        print(map180x180[6])
         self.spf = ShortestPathFinder(map180x180)
 
     def test_trivial_0_distance_path(self):
@@ -131,12 +161,12 @@ class ShortestPathFinderOn180x180MazeTest(unittest.TestCase):
 
     def test_path_to_the_adjacent_empty_square(self):
         start = (3,3)
-        finish = (3, 15)
+        finish = (3,15)
 
         dist, shortest_path = self.spf.get_shortest_path(start, finish)
         print(f'Distance: {dist}, path: {shortest_path}')
 
-        expected_dist = 3 + 12 + 3
+        expected_dist = 6 + 3 + 6 + 3
         self.assertEqual(dist, expected_dist)
 
 
@@ -159,7 +189,9 @@ class ShortestPathFinderOn1000x1000MazeTest(unittest.TestCase):
         finish = (256, 848)
 
         dist, shortest_path = self.spf.get_shortest_path(start, finish)
+        path_string = convert_path_to_string(shortest_path)
         print(f'Distance: {dist}, path: {shortest_path}')
+        print(f'Path string: {path_string}')
 
 
 

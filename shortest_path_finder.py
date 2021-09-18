@@ -35,6 +35,29 @@ def convert_file_to_array_map(filename: str) -> np.ndarray:
 
     return np.array(lines, dtype=int)
 
+def convert_path_to_string(shortest_path: List[Point]) -> str:
+    if not shortest_path:
+        return ''
+
+    assert len(shortest_path) >= 2, f'Minimum path should be of length 2 ({len(shortest_path)} was provided)!'
+    res = []
+    for i in range(0, len(shortest_path)-1):
+        current, next = shortest_path[i], shortest_path[i+1]
+        row_diff = next[0] - current[0]
+        col_diff = next[1] - current[1]
+
+        if row_diff == +1:
+            res.append('D')
+        elif row_diff == -1:
+            res.append('U')
+        elif col_diff == +1:
+            res.append('R')
+        elif col_diff == -1:
+            res.append('L')
+        else:
+            raise AssertionError(f'Wrong move: from {current} to the {next}')
+    return ''.join(res)
+
 class ShortestPathFinder(object):
     """
     Great article, explaining all needed algorithms https://www.redblobgames.com/pathfinding/a-star/introduction.html
