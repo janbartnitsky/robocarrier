@@ -144,7 +144,8 @@ class ShortestPathFinder(object):
 
 # ===========================================================================================================
 
-
+test_run = True # rename to false before Submit
+skip_prod_tests = [180, 384, 1024, 1000]
 
 # return from 1 to 100 robots
 def how_many_robots_to_use(map_name, cost_courier, iterations_count, orders_count):
@@ -152,36 +153,48 @@ def how_many_robots_to_use(map_name, cost_courier, iterations_count, orders_coun
 
 # return moves from path
 def get_robot_path_for_iteration(robot):
+	order_finished = False
 	if len(robot["path"]) < 60:
 		return_path = robot["path"] + ("S" * (60 - len(robot["path"])))
 		robot["path"] = ""
+		order_finished = True
 	else:
 		return_path = robot["path"][0:60]
 		robot["path"] = robot["path"][60:]
-	return return_path
-
-def shift_after_path(robot_path):
-	position_shift = [0, 0]
-	for i in range(len(robot_path)):
-		if robot_path[i] == "D":
-			position_shift[0] -= 1
-		elif robot_path[i] == "U":
-			position_shift[0] += 1
-		elif robot_path[i] == "R":
-			position_shift[1] -= 1
-		elif robot_path[i] == "L":
-			position_shift[1] += 1
-	return position_shift
-
+	return return_path, order_finished
 
 # get test conditions
-input_line = sys.stdin.readline()
-map_name, max_tips, cost_courier = map(int, input_line.split())
+if test_run:
+	map_name, max_tips, cost_courier, iterations_count, orders_count = 1024, 3600, 555555, 50000, 75259
+	print("TEST:", map_name, max_tips, cost_courier, iterations_count, orders_count)
+else:
+	input_line = sys.stdin.readline()
+	map_name, max_tips, cost_courier = map(int, input_line.split())
+
+
+if test_run:
+	allowed_coordinates = []
+	file_map = open('maps/' + str(map_name), 'r')
+	lines = file_map.readlines()
+	line_num = 0
+	for line in lines:
+		for position in range(0, len(line)):
+			if line[position] == '.':
+				allowed_coordinates.append([line_num + 1, position + 1])
+		line_num += 1
+
+	# create a set of iterations
+	iterations_set = [[] for i in range(iterations_count)]
+
 
 # skip map details
 citymap = []
-for _ in range(0,map_name):
-	input_line = sys.stdin.readline()
+for i in range(0,map_name):
+	if test_run:
+		input_line = lines[i]
+		#print("TEST:", input_line)
+	else:
+		input_line = sys.stdin.readline()
 	for position in range(0, len(input_line)):
 		if input_line[position] == '.':
 			citymap.append(0)
@@ -193,8 +206,16 @@ citymap = citymap.reshape(map_name, map_name)
 spf = ShortestPathFinder(citymap)
 
 # get iterations and orders count
-input_line = sys.stdin.readline()
-iterations_count, orders_count = map(int, input_line.split())
+if not test_run:
+	input_line = sys.stdin.readline()
+	iterations_count, orders_count = map(int, input_line.split())
+else:
+	# randomly create start and finish points for each order and assign it to a random iteration
+	for _ in range(1, orders_count):
+		random_iteration_number = random.randint(0, iterations_count - 1)
+		iterations_set[random_iteration_number].append([random.choice(allowed_coordinates), random.choice(allowed_coordinates)])
+
+
 
 # decide how many robots we need
 robots_count = 1#how_many_robots_to_use(map_name, cost_courier, iterations_count, orders_count)
@@ -203,15 +224,11 @@ sys.stdout.flush()
 
 
 # define robots position
-if map_name == 1000:
-	robots_initial_positions = [(396, 490), (477, 448), (448, 461), (482, 557), (751, 690), (512, 537), (500, 743), (359, 539), (426, 353), (652, 686), (443, 580), (342, 404), (897, 782), (359, 827), (437, 680), (446, 760), (282, 434), (244, 392), (531, 643), (600, 612), (854, 826), (704, 117), (904, 648), (391, 301), (383, 912), (515, 875), (825, 416), (234, 151), (934, 605), (649, 52), (760, 191), (84, 236), (96, 235), (150, 298), (157, 294), (204, 355), (213, 355), (319, 237), (314, 341), (318, 348), (316, 492), (324, 489), (395, 610), (401, 606), (563, 723), (570, 725), (460, 258), (472, 260), (528, 219), (530, 227), (592, 176), (598, 181), (800, 271), (808, 272), (831, 338), (838, 337), (874, 474), (881, 477), (818, 642), (812, 652), (396, 490), (477, 448), (448, 461), (482, 557), (751, 690), (512, 537), (500, 743), (359, 539), (426, 353), (652, 686), (443, 580), (342, 404), (897, 782), (359, 827), (437, 680), (446, 760), (396, 490), (477, 448), (448, 461), (482, 557), (751, 690), (512, 537), (500, 743), (359, 539), (426, 353), (652, 686), (443, 580), (342, 404), (897, 782), (359, 827), (437, 680), (446, 760), (282, 434), (244, 392), (531, 643), (600, 612), (854, 826), (396, 490), (477, 448), (448, 461), (482, 557)]
-	robots_set = [{"position": robots_initial_positions[i], "path": ""} for i in range(robots_count)]
-else:
-	robots_set = []
-	while len(robots_set) < robots_count:
-		row, col = random.randint(0, map_name - 1), random.randint(0, map_name - 1)
-		if citymap[row][col] == 0:
-			robots_set.append({"position": (row, col), "path": ""})
+robots_set = []
+while len(robots_set) < robots_count:
+	row, col = random.randint(0, map_name - 1), random.randint(0, map_name - 1)
+	if citymap[row][col] == 0:
+		robots_set.append({"position": (row, col), "path": ""})
 
 # output robot's positions
 for robot in robots_set:
@@ -223,39 +240,54 @@ sys.stdout.flush()
 orders_set = [] # [{"start": [1, 1], "finish": [1, 1], "max_possible_tips": max_tips} for i in range(robots_count)]
 
 # perform iterations
-for _ in range(0, iterations_count):
-	input_line = sys.stdin.readline()
-	orders_in_iteration = int(input_line)
-	# append new orders to orders set
-	for _ in range(0, orders_in_iteration):
+for i in range(0, iterations_count):
+	if test_run:
+		orders_in_iteration = len(iterations_set[i])
+		print("TEST:", orders_in_iteration)
+	else:
 		input_line = sys.stdin.readline()
-		start_x, start_y, finish_x, finish_y = map(int, input_line.split())
+		orders_in_iteration = int(input_line)
+	# append new orders to orders set
+	for j in range(0, orders_in_iteration):
+		if test_run:
+			order = iterations_set[i][j]
+			start_x, start_y, finish_x, finish_y = order[0][0], order[0][1], order[1][0], order[1][1]
+			print("TEST:", start_x, start_y, finish_x, finish_y)
+		else:
+			input_line = sys.stdin.readline()
+			start_x, start_y, finish_x, finish_y = map(int, input_line.split())
 		orders_set.append({"start": (start_x-1, start_y-1), "finish": (finish_x-1, finish_y-1), "max_possible_tips": max_tips, "responsible_robot": -1})
 
 	# print(f'[D] all orders: {orders_set}')
 	robot = robots_set[0]
+
 	# if robot is free
 	if robot["path"] == "" and len(orders_set) > 0:
 		orders_set = sorted(orders_set, key=lambda x: x['max_possible_tips'], reverse=True)
 		current_order = orders_set.pop(0)
 
-		full_robot_path = ''
-		dist, path = spf.get_shortest_path(robot['position'], current_order['start'])
-		path_to_the_package = convert_path_to_string(path)
-		full_robot_path += path_to_the_package
-		full_robot_path += 'T'
-		dist, path = spf.get_shortest_path(current_order['start'], current_order['finish'])
-		path_to_the_drop_point = convert_path_to_string(path)
-		full_robot_path += path_to_the_drop_point
-		full_robot_path += 'P'
+		if test_run == True or map_name not in skip_prod_tests:
 
-		robot["path"] = full_robot_path
+			full_robot_path = ''
+			dist, path = spf.get_shortest_path(robot['position'], current_order['start'])
+			path_to_the_package = convert_path_to_string(path)
+			full_robot_path += path_to_the_package
+			full_robot_path += 'T'
+			dist, path = spf.get_shortest_path(current_order['start'], current_order['finish'])
+			path_to_the_drop_point = convert_path_to_string(path)
+			full_robot_path += path_to_the_drop_point
+			full_robot_path += 'P'
 
+			robot["path"] = full_robot_path
 
 	for robot in robots_set:
-		robot_path = get_robot_path_for_iteration(robot)
-		robot_position_shift = shift_after_path(robot_path)
-		robot["position"] = (robot["position"][0] - robot_position_shift[0], robot["position"][1] - robot_position_shift[1])
+		robot_path, order_finished = get_robot_path_for_iteration(robot)
+		#error check: robot position must be in the place of finished order
+		if order_finished:
+			robot["position"] = current_order['finish']
+			if test_run:
+				if robot["position"] != current_order["finish"]:
+					print("Something wrong with the order ", robot["position"], current_order["finish"])
 		sys.stdout.write(robot_path + '\n')
 	sys.stdout.flush()
 
